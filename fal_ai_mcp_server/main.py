@@ -40,10 +40,7 @@ async def generate_image_lora(ctx: Context, prompt: str, lora_url: str, lora_sca
             "guidance_scale": 3.5,
             "num_images": 1,
             "output_format": "png",
-            "loras": [{
-                "path": lora_url,
-                "scale": lora_scale
-            }]
+            "loras": [{"path": lora_url, "scale": lora_scale}],
         },
     )
     return save_image(ctx, handler)
@@ -56,17 +53,14 @@ async def edit_image(ctx: Context, prompt: str, image_path: str):
     image_url = fal_client.upload_file(image_path)
     handler = fal_client.submit(
         "fal-ai/gemini-flash-edit",
-        arguments={
-            "prompt": prompt,
-            "image_url": image_url
-        },
+        arguments={"prompt": prompt, "image_url": image_url},
     )
     return save_image(ctx, handler)
 
 
 def save_image(ctx: Context, handler):
     result = handler.get()
-    
+
     image_url = None
     if result.get("images"):
         image_url = result.get("images")[0].get("url")
