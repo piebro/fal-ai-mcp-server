@@ -1,0 +1,4 @@
+*.egg-info
+fal_ai_mcp_server/_version.py
+__pycache__
+images/
