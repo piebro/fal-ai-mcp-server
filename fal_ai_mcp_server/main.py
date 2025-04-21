@@ -23,7 +23,7 @@ async def generate_image(ctx: Context, prompt: str):
             "output_format": "png",
         },
     )
-    return save_image(ctx, handler)
+    return save_image_or_video(ctx, handler, '.png')
 
 
 @mcp.tool()
@@ -43,7 +43,7 @@ async def generate_image_lora(ctx: Context, prompt: str, lora_url: str, lora_sca
             "loras": [{"path": lora_url, "scale": lora_scale}],
         },
     )
-    return save_image(ctx, handler)
+    return save_image_or_video(ctx, handler, '.png')
 
 
 @mcp.tool()
@@ -55,34 +55,70 @@ async def edit_image(ctx: Context, prompt: str, image_path: str):
         "fal-ai/gemini-flash-edit",
         arguments={"prompt": prompt, "image_url": image_url},
     )
-    return save_image(ctx, handler)
+    return save_image_or_video(ctx, handler, '.png')
 
 
-def save_image(ctx: Context, handler):
+@mcp.tool()
+async def generate_video(ctx: Context, prompt: str, image_path: str, negative_prompt: str = "None"):
+    """Generate a video based on a prompt and an initial image using the wan-i2v/turbo model."""
+    await ctx.info(f"Generating video with prompt: {prompt}")
+    image_url = fal_client.upload_file(image_path)
+    if negative_prompt == "None":
+        negative_prompt = (
+            "bright colors, overexposed, static, blurred details, subtitles, style, artwork, painting, "
+            "picture, still, overall gray, worst quality, low quality, JPEG compression residue, ugly, "
+            "incomplete, extra fingers, poorly drawn hands, poorly drawn faces, deformed, disfigured, "
+            "malformed limbs, fused fingers, still picture, cluttered background, three legs, many people "
+            "in the background, walking backwards"
+        )
+    handler = fal_client.submit(
+        "fal-ai/wan-i2v/turbo",
+        arguments={
+            "prompt": prompt,
+            "negative_prompt": negative_prompt,
+            "image_url": image_url,
+            "num_frames": 81,
+            "frames_per_second": 16,
+            "resolution": "480p",
+            "num_inference_steps": 30,
+            "shift": 5,
+            "acceleration": "regular",
+            "aspect_ratio": "auto",
+        },
+    )
+    return save_image_or_video(ctx, handler, '.mp4')
+
+
+def save_image_or_video(ctx: Context, handler, file_extension: str):
+    """Saves the image or video result from a fal-client handler."""
     result = handler.get()
+    media_url = None
 
-    image_url = None
     if result.get("images"):
-        image_url = result.get("images")[0].get("url")
+        media_url = result.get("images")[0].get("url")
     elif result.get("image"):
-        image_url = result.get("image")["url"]
+        media_url = result.get("image")["url"]
+    elif result.get("video"):
+        media_url = result.get("video")["url"]
 
-    if image_url:
-        response = requests.get(image_url)
+    if media_url:
+        response = requests.get(media_url)
         response.raise_for_status()
 
-        save_dir = os.environ.get("SAVE_IMAGE_DIR")
+        save_dir = os.environ.get("SAVE_MEDIA_DIR")
         if not save_dir:
-            raise Exception("SAVE_IMAGE_DIR environment variable not set.")
+            raise Exception("SAVE_MEDIA_DIR environment variable not set.")
 
         os.makedirs(save_dir, exist_ok=True)
-        next_index = len([f for f in os.listdir(save_dir) if f.lower().endswith(".png")])
-        filepath = os.path.join(save_dir, f"{next_index:05d}.png")
+        next_index = len(os.listdir(save_dir))
+        filepath = os.path.join(save_dir, f"{next_index:05d}{file_extension}")
+
         with open(filepath, "wb") as f:
             f.write(response.content)
-        ctx.info(f"Image saved to {filepath}")
-        return f"SEND_IMAGE_PATH: {filepath}"
-    raise Exception("Error generating or saving the image")
+        ctx.info(f"Saved to {filepath}")
+        return f"SEND_MEDIA_PATH: {filepath}"
+
+    raise Exception("Error generating or saving the image or video")
 
 
 def main():

@@ -1,6 +1,7 @@
 # Fal AI MCP Server
 
-An MCP (Model Context Protocol) Server to use the fal.ai APIs to generate images and videos.
+An MCP (Model Context Protocol) server to use the fal.ai APIs to generate images and videos.
+This is a barebones server that anyone can extend to use different fal.ai models and API endpoints.
 
 ## Usage
 
@@ -15,7 +16,7 @@ Install [uv](https://docs.astral.sh/uv/) and add the server to an MCP config usi
     ],
     "env": {
         "FAL_KEY": "your-key",
-        "SAVE_IMAGE_DIR": "path/to/save/images"
+        "SAVE_MEDIA_DIR": "path/to/save/images"
     }
 }
 ```
@@ -34,7 +35,7 @@ or clone the repo and use `uv` with a directory:
     ],
     "env": {
         "FAL_KEY": "your-key",
-        "SAVE_IMAGE_DIR": "path/to/save/images"
+        "SAVE_MEDIA_DIR": "path/to/save/images"
     }
 }
 ```
@@ -60,7 +61,7 @@ uvx mcp-client-for-testing \
             ],
             "env": {
                 "FAL_KEY": "your-key",
-                "SAVE_IMAGE_DIR": "path/to/save/images"
+                "SAVE_MEDIA_DIR": "path/to/save/images"
             }
         }
     ]
