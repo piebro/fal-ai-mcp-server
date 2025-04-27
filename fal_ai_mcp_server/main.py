@@ -89,7 +89,7 @@ async def generate_video(ctx: Context, prompt: str, image_path: str, negative_pr
     return save_image_or_video(ctx, handler, '.mp4')
 
 
-def save_image_or_video(ctx: Context, handler, file_extension: str):
+async def save_image_or_video(ctx: Context, handler, file_extension: str):
     """Saves the image or video result from a fal-client handler."""
     result = handler.get()
     media_url = None
