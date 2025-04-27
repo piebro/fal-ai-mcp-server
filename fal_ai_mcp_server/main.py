@@ -115,7 +115,7 @@ def save_image_or_video(ctx: Context, handler, file_extension: str):
 
         with open(filepath, "wb") as f:
             f.write(response.content)
-        ctx.info(f"Saved to {filepath}")
+        await ctx.info(f"Saved to {filepath}")
         return f"The image or video was successfully generated and saved at: {filepath}"
 
     raise Exception("Error generating or saving the image or video")
