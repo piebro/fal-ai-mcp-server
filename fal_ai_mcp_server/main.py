@@ -23,7 +23,7 @@ async def generate_image(ctx: Context, prompt: str):
             "output_format": "png",
         },
     )
-    return save_image_or_video(ctx, handler, '.png')
+    return await save_image_or_video(ctx, handler, '.png')
 
 
 @mcp.tool()
@@ -43,7 +43,7 @@ async def generate_image_lora(ctx: Context, prompt: str, lora_url: str, lora_sca
             "loras": [{"path": lora_url, "scale": lora_scale}],
         },
     )
-    return save_image_or_video(ctx, handler, '.png')
+    return await save_image_or_video(ctx, handler, '.png')
 
 
 @mcp.tool()
@@ -55,7 +55,7 @@ async def edit_image(ctx: Context, prompt: str, image_path: str):
         "fal-ai/gemini-flash-edit",
         arguments={"prompt": prompt, "image_url": image_url},
     )
-    return save_image_or_video(ctx, handler, '.png')
+    return await save_image_or_video(ctx, handler, '.png')
 
 
 @mcp.tool()
@@ -86,7 +86,7 @@ async def generate_video(ctx: Context, prompt: str, image_path: str, negative_pr
             "aspect_ratio": "auto",
         },
     )
-    return save_image_or_video(ctx, handler, '.mp4')
+    return await save_image_or_video(ctx, handler, '.mp4')
 
 
 async def save_image_or_video(ctx: Context, handler, file_extension: str):
